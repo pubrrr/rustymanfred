@@ -1,3 +1,11 @@
+use bevy::prelude::*;
+
 fn main() {
-    println!("Hello, world!");
+    App::build()
+        .add_system(hello_system.system())
+        .run();
+}
+
+fn hello_system() {
+    println!("hi");
 }
