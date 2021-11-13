@@ -20,15 +20,24 @@ fn main() {
 }
 
 fn add_manf(mut commands: Commands) {
-    commands.spawn_bundle((Manfred, Position::new(0, 0), Velocity::new()));
+    commands
+        .spawn_bundle((Manfred, Position::new(0, 0), Velocity::new()))
+        .insert_bundle(SpriteBundle {
+            sprite: Sprite::new(Vec2::new(10.0, 10.0)),
+            ..Default::default()
+        });
+    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
 }
 
-fn position_components(mut query: Query<(&mut Position, &Velocity), With<Manfred>>) {
+fn position_components(mut query: Query<(&mut Transform, &Velocity), With<Manfred>>) {
     println!("position query arrived: {}", query.iter_mut().count());
-    query.for_each_mut(|(mut position, velocity)| {
-        position.x += velocity.x;
-        position.y += velocity.y;
-        println!("manfred at ({},{})", position.x, position.y)
+    query.for_each_mut(|(mut transform, velocity)| {
+        transform.translation.x += velocity.x as f32;
+        transform.translation.y += velocity.y as f32;
+        println!(
+            "manfred at ({},{})",
+            transform.translation.x, transform.translation.y
+        )
     });
 }
 
@@ -39,6 +48,15 @@ fn velocity_components(
     query.for_each_mut(|mut velocity| {
         if keyboard_input.pressed(KeyCode::A) {
             velocity.x -= 1;
+        }
+        if keyboard_input.pressed(KeyCode::D) {
+            velocity.x += 1;
+        }
+        if keyboard_input.pressed(KeyCode::W) {
+            velocity.y += 1;
+        }
+        if keyboard_input.pressed(KeyCode::S) {
+            velocity.y -= 1;
         }
     });
 }
