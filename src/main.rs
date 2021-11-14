@@ -29,7 +29,7 @@ fn add_manf(mut commands: Commands) {
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
 }
 
-fn position_components(mut query: Query<(&mut Transform, &Velocity), With<Manfred>>) {
+fn position_components(mut query: Query<(&mut Transform, &Velocity)>) {
     println!("position query arrived: {}", query.iter_mut().count());
     query.for_each_mut(|(mut transform, velocity)| {
         transform.translation.x += velocity.x as f32;
@@ -45,7 +45,7 @@ fn velocity_components(
     keyboard_input: Res<Input<KeyCode>>,
     mut query: Query<&mut Velocity, With<Manfred>>,
 ) {
-    query.for_each_mut(|mut velocity| {
+    if let Some(mut velocity) = query.iter_mut().next() {
         if keyboard_input.pressed(KeyCode::A) {
             velocity.x -= 1;
         }
@@ -58,5 +58,5 @@ fn velocity_components(
         if keyboard_input.pressed(KeyCode::S) {
             velocity.y -= 1;
         }
-    });
+    };
 }
