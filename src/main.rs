@@ -6,9 +6,14 @@ use bevy::prelude::*;
 use bevy::DefaultPlugins;
 
 use crate::component::manfred::Manfred;
-use crate::component::{Direction, Position, Velocity};
+use crate::component::velocity::Velocity;
+use crate::component::Position;
+use crate::types::Direction;
 
 mod component;
+mod types;
+
+const SPRITES_PER_ATLAS_ROW: u32 = 8;
 
 fn main() {
     App::build()
@@ -39,7 +44,7 @@ fn add_manf(
     let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(40.0, 80.0), 8, 4);
 
     commands
-        .spawn_bundle((Manfred::default(), Position::new(0, 0), Velocity::new()))
+        .spawn_bundle((Manfred::default(), Position::new(0, 0), Velocity::new(5)))
         .insert_bundle(SpriteSheetBundle {
             texture_atlas: texture_atlases.add(texture_atlas),
             ..Default::default()
@@ -52,17 +57,17 @@ fn manfred_sprite_system(mut query: Query<(&mut TextureAtlasSprite, &Manfred, &V
         let new_index = if !velocity.is_moving() {
             0
         } else {
-            ((atlas_sprite.index + 1) as usize % 8) as u32
+            ((atlas_sprite.index + 1) % SPRITES_PER_ATLAS_ROW) as u32
         };
 
         let direction_offset = match manfred.view_direction {
             Direction::Down => 0,
-            Direction::Left => 8,
-            Direction::Right => 16,
-            Direction::Up => 24,
+            Direction::Left => 1,
+            Direction::Right => 2,
+            Direction::Up => 3,
         };
 
-        atlas_sprite.index = new_index + direction_offset;
+        atlas_sprite.index = new_index + direction_offset * SPRITES_PER_ATLAS_ROW;
     }
 }
 
