@@ -36,6 +36,16 @@ impl Velocity {
         }
     }
 
+    pub fn decelerate(&mut self, direction: Direction) {
+        match direction {
+            Direction::Up if self.y > 0 => self.y -= 1,
+            Direction::Down if self.y < 0 => self.y += 1,
+            Direction::Left if self.x < 0 => self.x += 1,
+            Direction::Right if self.x > 0 => self.x -= 1,
+            _ => {}
+        }
+    }
+
     pub fn is_moving(&self) -> bool {
         self.x != 0 || self.y != 0
     }
@@ -96,7 +106,7 @@ mod tests {
     #[case(vec![Direction::Down, Direction::Right], vec![Direction::Right, Direction::Down])]
     #[case(vec![Direction::Up, Direction::Left], vec![Direction::Left, Direction::Up])]
     #[case(vec![Direction::Up, Direction::Right], vec![Direction::Right, Direction::Up])]
-    #[case(vec![Direction::Up, Direction::Up, Direction::Up, Direction::Up, Direction::Up, Direction::Right], vec![Direction::Up, Direction::Right, Direction::Up, Direction::Up, Direction::Up])]
+    #[case(vec![Direction::Up, Direction::Up, Direction::Up, Direction::Up, Direction::Right], vec![Direction::Up, Direction::Right, Direction::Up, Direction::Up, Direction::Up])]
     fn acceleration_is_commutative(
         #[case] acceleration_steps: Vec<Direction>,
         #[case] commuted_acceleration_steps: Vec<Direction>,
@@ -119,6 +129,51 @@ mod tests {
             comparison_velocity.get_direction(),
             under_test.get_direction()
         );
+    }
+
+    #[test]
+    fn accelerate_in_different_direction() {
+        let mut under_test = Velocity::new(10);
+
+        under_test.accelerate(Direction::Left);
+        assert_eq!(-1, under_test.x());
+        assert_eq!(0, under_test.y());
+
+        under_test.accelerate(Direction::Down);
+        assert_eq!(-1, under_test.x());
+        assert_eq!(-1, under_test.y());
+
+        under_test.accelerate(Direction::Right);
+        assert_eq!(0, under_test.x());
+        assert_eq!(-1, under_test.y());
+
+        under_test.accelerate(Direction::Up);
+        assert_eq!(0, under_test.x());
+        assert_eq!(0, under_test.y());
+    }
+
+    #[rstest]
+    #[case(Direction::Down)]
+    #[case(Direction::Right)]
+    #[case(Direction::Up)]
+    #[case(Direction::Left)]
+    fn accelerate_and_decelerate(#[case] direction: Direction) {
+        let mut under_test = Velocity::new(10);
+
+        under_test.accelerate(direction);
+        assert!(under_test.is_moving());
+
+        under_test.accelerate(direction);
+        assert!(under_test.is_moving());
+
+        under_test.decelerate(direction);
+        assert!(under_test.is_moving());
+
+        under_test.decelerate(direction);
+        assert!(!under_test.is_moving());
+
+        under_test.decelerate(direction);
+        assert!(!under_test.is_moving());
     }
 
     #[test]

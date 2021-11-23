@@ -1,6 +1,3 @@
-use std::collections::HashMap;
-
-use bevy::asset::Handle;
 use bevy::core::FixedTimestep;
 use bevy::prelude::*;
 use bevy::DefaultPlugins;
@@ -8,9 +5,11 @@ use bevy::DefaultPlugins;
 use crate::component::manfred::Manfred;
 use crate::component::velocity::Velocity;
 use crate::component::Position;
+use crate::system::velocity::velocity_control_system;
 use crate::types::Direction;
 
 mod component;
+mod system;
 mod types;
 
 const SPRITES_PER_ATLAS_ROW: u32 = 8;
@@ -19,7 +18,7 @@ fn main() {
     App::build()
         .add_plugins(DefaultPlugins)
         .add_startup_system(add_manf.system())
-        .add_system(velocity_components.system().label("velocity"))
+        .add_system(velocity_control_system.system().label("velocity"))
         .add_system(
             position_components
                 .system()
@@ -76,28 +75,4 @@ fn position_components(mut query: Query<(&mut Transform, &Velocity)>) {
         transform.translation.x += velocity.x() as f32;
         transform.translation.y += velocity.y() as f32;
     });
-}
-
-fn velocity_components(
-    keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<(&mut Velocity, &mut Manfred)>,
-) {
-    if let Some((mut velocity, mut manfred)) = query.iter_mut().next() {
-        if keyboard_input.pressed(KeyCode::A) {
-            velocity.accelerate(Direction::Left);
-        }
-        if keyboard_input.pressed(KeyCode::D) {
-            velocity.accelerate(Direction::Right);
-        }
-        if keyboard_input.pressed(KeyCode::W) {
-            velocity.accelerate(Direction::Up);
-        }
-        if keyboard_input.pressed(KeyCode::S) {
-            velocity.accelerate(Direction::Down);
-        }
-
-        if velocity.is_moving() {
-            manfred.view_direction = velocity.get_direction();
-        }
-    };
 }

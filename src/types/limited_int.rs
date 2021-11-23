@@ -93,7 +93,7 @@ mod tests {
     #[case(7, 5)]
     #[case(-10, -5)]
     fn initialization_does_not_exceed_limits(#[case] initial_value: i32, #[case] expected: i32) {
-        let mut under_test = LimitedInt::<5>::new(initial_value);
+        let under_test = LimitedInt::<5>::new(initial_value);
 
         assert_eq!(expected, under_test.value());
     }
