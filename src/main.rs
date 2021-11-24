@@ -3,7 +3,6 @@ use bevy::prelude::*;
 use bevy::DefaultPlugins;
 
 use crate::component::manfred::Manfred;
-use crate::component::velocity::Velocity;
 use crate::component::Position;
 use crate::system::velocity::velocity_control_system;
 use crate::types::Direction;
@@ -13,6 +12,8 @@ mod system;
 mod types;
 
 const SPRITES_PER_ATLAS_ROW: u32 = 8;
+
+type Velocity = crate::component::velocity::Velocity<10>;
 
 fn main() {
     App::build()
