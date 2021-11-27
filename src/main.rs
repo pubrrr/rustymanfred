@@ -4,7 +4,7 @@ use bevy::DefaultPlugins;
 
 use crate::component::manfred::Manfred;
 use crate::component::Position;
-use crate::system::position::move_positions_system;
+use crate::system::position::{move_positions_system, FromXAndY};
 use crate::system::velocity::velocity_control_system;
 use crate::types::Direction;
 
@@ -64,7 +64,7 @@ fn add_tree(
     commands.spawn_bundle(SpriteBundle {
         sprite: Sprite::new(Vec2::new(80.0, 200.0)),
         material: color_materials.add(ColorMaterial::from(texture_handle)),
-        transform: Transform::from_xyz(160.0, 160.0, 10.0),
+        transform: Transform::from_translation(Vec3::compute_from_x_y(160.0, 160.0)),
         ..Default::default()
     });
 }

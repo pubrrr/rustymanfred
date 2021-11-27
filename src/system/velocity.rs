@@ -225,7 +225,7 @@ mod tests {
             let manfred_id = world
                 .spawn()
                 .insert(Manfred::default())
-                .insert(Velocity::new(5))
+                .insert(Velocity::new(100))
                 .id();
 
             WorldWrapper {
