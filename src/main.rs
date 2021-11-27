@@ -1,6 +1,7 @@
 use bevy::core::FixedTimestep;
 use bevy::prelude::*;
 use bevy::DefaultPlugins;
+use std::collections::HashMap;
 
 use crate::component::manfred::Manfred;
 use crate::component::Position;
@@ -19,6 +20,7 @@ fn main() {
     App::build()
         .add_plugins(DefaultPlugins)
         .add_startup_system(add_manf.system())
+        .add_startup_system(add_tree.system())
         .add_system(velocity_control_system.system().label("velocity"))
         .add_system(
             position_components
@@ -50,6 +52,21 @@ fn add_manf(
             ..Default::default()
         });
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+}
+
+fn add_tree(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut color_materials: ResMut<Assets<ColorMaterial>>,
+) {
+    let texture_handle = asset_server.load("images\\objects\\tree2.png");
+
+    commands.spawn_bundle(SpriteBundle {
+        sprite: Sprite::new(Vec2::new(80.0, 200.0)),
+        material: color_materials.add(ColorMaterial::from(texture_handle)),
+        transform: Transform::from_xyz(160.0, 160.0, 10.0),
+        ..Default::default()
+    });
 }
 
 fn manfred_sprite_system(mut query: Query<(&mut TextureAtlasSprite, &Manfred, &Velocity)>) {
