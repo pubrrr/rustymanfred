@@ -1,10 +1,10 @@
 use bevy::core::FixedTimestep;
 use bevy::prelude::*;
 use bevy::DefaultPlugins;
-use std::collections::HashMap;
 
 use crate::component::manfred::Manfred;
 use crate::component::Position;
+use crate::system::position::move_positions_system;
 use crate::system::velocity::velocity_control_system;
 use crate::types::Direction;
 
@@ -23,7 +23,7 @@ fn main() {
         .add_startup_system(add_tree.system())
         .add_system(velocity_control_system.system().label("velocity"))
         .add_system(
-            position_components
+            move_positions_system
                 .system()
                 .label("update_position")
                 .after("velocity"),
@@ -86,11 +86,4 @@ fn manfred_sprite_system(mut query: Query<(&mut TextureAtlasSprite, &Manfred, &V
 
         atlas_sprite.index = new_index + direction_offset * MANFRED_SPRITE_ATLAS_COLUMNS;
     }
-}
-
-fn position_components(mut query: Query<(&mut Transform, &Velocity)>) {
-    query.for_each_mut(|(mut transform, velocity)| {
-        transform.translation.x += velocity.x() as f32;
-        transform.translation.y += velocity.y() as f32;
-    });
 }
