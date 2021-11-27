@@ -1,20 +1,25 @@
-use std::collections::HashMap;
-
-use bevy::asset::Handle;
 use bevy::core::FixedTimestep;
 use bevy::prelude::*;
 use bevy::DefaultPlugins;
 
 use crate::component::manfred::Manfred;
-use crate::component::{Direction, Position, Velocity};
+use crate::component::Position;
+use crate::system::velocity::velocity_control_system;
+use crate::types::Direction;
 
 mod component;
+mod system;
+mod types;
+
+const SPRITES_PER_ATLAS_ROW: u32 = 8;
+
+type Velocity = crate::component::velocity::Velocity<10>;
 
 fn main() {
     App::build()
         .add_plugins(DefaultPlugins)
         .add_startup_system(add_manf.system())
-        .add_system(velocity_components.system().label("velocity"))
+        .add_system(velocity_control_system.system().label("velocity"))
         .add_system(
             position_components
                 .system()
@@ -39,7 +44,7 @@ fn add_manf(
     let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(40.0, 80.0), 8, 4);
 
     commands
-        .spawn_bundle((Manfred::default(), Position::new(0, 0), Velocity::new()))
+        .spawn_bundle((Manfred::default(), Position::new(0, 0), Velocity::new(5)))
         .insert_bundle(SpriteSheetBundle {
             texture_atlas: texture_atlases.add(texture_atlas),
             ..Default::default()
@@ -52,17 +57,17 @@ fn manfred_sprite_system(mut query: Query<(&mut TextureAtlasSprite, &Manfred, &V
         let new_index = if !velocity.is_moving() {
             0
         } else {
-            ((atlas_sprite.index + 1) as usize % 8) as u32
+            ((atlas_sprite.index + 1) % SPRITES_PER_ATLAS_ROW) as u32
         };
 
         let direction_offset = match manfred.view_direction {
             Direction::Down => 0,
-            Direction::Left => 8,
-            Direction::Right => 16,
-            Direction::Up => 24,
+            Direction::Left => 1,
+            Direction::Right => 2,
+            Direction::Up => 3,
         };
 
-        atlas_sprite.index = new_index + direction_offset;
+        atlas_sprite.index = new_index + direction_offset * SPRITES_PER_ATLAS_ROW;
     }
 }
 
@@ -71,28 +76,4 @@ fn position_components(mut query: Query<(&mut Transform, &Velocity)>) {
         transform.translation.x += velocity.x() as f32;
         transform.translation.y += velocity.y() as f32;
     });
-}
-
-fn velocity_components(
-    keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<(&mut Velocity, &mut Manfred)>,
-) {
-    if let Some((mut velocity, mut manfred)) = query.iter_mut().next() {
-        if keyboard_input.pressed(KeyCode::A) {
-            velocity.accelerate(Direction::Left);
-        }
-        if keyboard_input.pressed(KeyCode::D) {
-            velocity.accelerate(Direction::Right);
-        }
-        if keyboard_input.pressed(KeyCode::W) {
-            velocity.accelerate(Direction::Up);
-        }
-        if keyboard_input.pressed(KeyCode::S) {
-            velocity.accelerate(Direction::Down);
-        }
-
-        if velocity.is_moving() {
-            manfred.view_direction = velocity.get_direction();
-        }
-    };
 }
