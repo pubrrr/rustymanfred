@@ -11,7 +11,7 @@ mod component;
 mod system;
 mod types;
 
-const SPRITES_PER_ATLAS_ROW: u32 = 8;
+const MANFRED_SPRITE_ATLAS_COLUMNS: u32 = 8;
 
 type Velocity = crate::component::velocity::Velocity<10>;
 
@@ -57,7 +57,7 @@ fn manfred_sprite_system(mut query: Query<(&mut TextureAtlasSprite, &Manfred, &V
         let new_index = if !velocity.is_moving() {
             0
         } else {
-            ((atlas_sprite.index + 1) % SPRITES_PER_ATLAS_ROW) as u32
+            ((atlas_sprite.index + 1) % MANFRED_SPRITE_ATLAS_COLUMNS) as u32
         };
 
         let direction_offset = match manfred.view_direction {
@@ -67,7 +67,7 @@ fn manfred_sprite_system(mut query: Query<(&mut TextureAtlasSprite, &Manfred, &V
             Direction::Up => 3,
         };
 
-        atlas_sprite.index = new_index + direction_offset * SPRITES_PER_ATLAS_ROW;
+        atlas_sprite.index = new_index + direction_offset * MANFRED_SPRITE_ATLAS_COLUMNS;
     }
 }
 
