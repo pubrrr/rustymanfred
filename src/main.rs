@@ -1,5 +1,6 @@
 use bevy::core::FixedTimestep;
 use bevy::prelude::*;
+use bevy::window::WindowMode;
 use bevy::DefaultPlugins;
 
 use crate::component::manfred::Manfred;
@@ -18,6 +19,14 @@ type Velocity = crate::component::velocity::Velocity<10>;
 
 fn main() {
     App::build()
+        .insert_resource(WindowDescriptor {
+            title: "Manfreds Apokalypse".to_string(),
+            width: 1600.,
+            height: 800.,
+            decorations: false,
+            mode: WindowMode::Windowed,
+            ..Default::default()
+        })
         .add_plugins(DefaultPlugins)
         .add_startup_system(add_manf.system())
         .add_startup_system(add_tree.system())
