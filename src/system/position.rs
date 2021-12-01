@@ -1,14 +1,18 @@
 use bevy::prelude::{Query, Transform, Vec3};
 
-use crate::Velocity;
+use crate::{Position, Velocity, With};
 
-pub fn move_positions_system(query: Query<(&mut Transform, &Velocity)>) {
-    query.for_each_mut(|(mut transform, velocity)| {
-        transform.translation = Vec3::compute_from_x_y(
-            transform.translation.x + velocity.x() as f32,
-            transform.translation.y + velocity.y() as f32,
-        );
+pub fn move_positions_system(query: Query<(&mut Position, &Velocity)>) {
+    query.for_each_mut(|(mut position, velocity)| {
+        position.x += velocity.x();
+        position.y += velocity.y();
     });
+}
+
+pub fn update_translations_system(query: Query<(&mut Transform, &Position), With<Velocity>>) {
+    query.for_each_mut(|(mut transform, position)| {
+        transform.translation = Vec3::compute_from_x_y(position.x as f32, position.y as f32)
+    })
 }
 
 pub trait FromXAndY {
@@ -32,9 +36,10 @@ mod tests {
 
     use quickcheck_macros::quickcheck;
 
-    use crate::system::position::FromXAndY;
+    use crate::system::position::{update_translations_system, FromXAndY};
     use crate::{
-        move_positions_system, Direction, IntoSystem, Stage, SystemStage, Velocity, World,
+        move_positions_system, Direction, IntoSystem, ParallelSystemDescriptorCoercion, Position,
+        Stage, SystemStage, Velocity, World,
     };
 
     #[quickcheck]
@@ -98,7 +103,8 @@ mod tests {
             let mut world = World::default();
 
             let mut system_stage = SystemStage::parallel();
-            system_stage.add_system(move_positions_system.system());
+            system_stage.add_system(move_positions_system.system().label("move"));
+            system_stage.add_system(update_translations_system.system().after("move"));
 
             let entity_id = world
                 .spawn()
@@ -106,6 +112,7 @@ mod tests {
                     0.0, 0.0,
                 )))
                 .insert(Velocity::new(10))
+                .insert(Position::default())
                 .id();
 
             WorldWrapper {

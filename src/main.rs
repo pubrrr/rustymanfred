@@ -4,8 +4,8 @@ use bevy::window::WindowMode;
 use bevy::DefaultPlugins;
 
 use crate::component::manfred::Manfred;
-use crate::component::Position;
-use crate::system::position::{move_positions_system, FromXAndY};
+use crate::component::position::Position;
+use crate::system::position::{move_positions_system, update_translations_system, FromXAndY};
 use crate::system::velocity::velocity_control_system;
 use crate::types::Direction;
 
@@ -16,6 +16,13 @@ mod types;
 const MANFRED_SPRITE_ATLAS_COLUMNS: u32 = 8;
 
 type Velocity = crate::component::velocity::Velocity<10>;
+
+#[derive(SystemLabel, Debug, Eq, PartialEq, Clone, Hash)]
+enum SystemLabels {
+    ApplyVelocity,
+    UpdatePositions,
+    UpdateTranslations,
+}
 
 fn main() {
     App::build()
@@ -30,12 +37,22 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_startup_system(add_manf.system())
         .add_startup_system(add_tree.system())
-        .add_system(velocity_control_system.system().label("velocity"))
+        .add_system(
+            velocity_control_system
+                .system()
+                .label(SystemLabels::ApplyVelocity),
+        )
         .add_system(
             move_positions_system
                 .system()
-                .label("update_position")
-                .after("velocity"),
+                .label(SystemLabels::UpdatePositions)
+                .after(SystemLabels::ApplyVelocity),
+        )
+        .add_system(
+            update_translations_system
+                .system()
+                .label(SystemLabels::UpdateTranslations)
+                .after(SystemLabels::UpdatePositions),
         )
         .add_system_set(
             SystemSet::new()
