@@ -53,15 +53,15 @@ mod tests {
     }
 
     #[rstest]
-    #[case(vec![], 0.0, 0.0, Ordering::Equal)]
-    #[case(vec![Direction::Down], 0.0, -1.0, Ordering::Greater)]
-    #[case(vec![Direction::Down, Direction::Right], 1.0, -1.0, Ordering::Greater)]
-    #[case(vec![Direction::Right], 1.0, 0.0, Ordering::Equal)]
-    #[case(vec![Direction::Up, Direction::Right], 1.0, 1.0, Ordering::Less)]
-    #[case(vec![Direction::Up],0.0, 1.0, Ordering::Less)]
-    #[case(vec![Direction::Up, Direction::Left], -1.0, 1.0, Ordering::Less)]
-    #[case(vec![Direction::Left], -1.0, 0.0, Ordering::Equal)]
-    #[case(vec![Direction::Down, Direction::Left], -1.0, -1.0, Ordering::Greater)]
+    #[case::zero_input(vec![], 0.0, 0.0, Ordering::Equal)]
+    #[case::down(vec![Direction::Down], 0.0, -1.0, Ordering::Greater)]
+    #[case::down_right(vec![Direction::Down, Direction::Right], 1.0, -1.0, Ordering::Greater)]
+    #[case::right(vec![Direction::Right], 1.0, 0.0, Ordering::Equal)]
+    #[case::up_right(vec![Direction::Up, Direction::Right], 1.0, 1.0, Ordering::Less)]
+    #[case::up(vec![Direction::Up],0.0, 1.0, Ordering::Less)]
+    #[case::up_left(vec![Direction::Up, Direction::Left], -1.0, 1.0, Ordering::Less)]
+    #[case::left_(vec![Direction::Left], -1.0, 0.0, Ordering::Equal)]
+    #[case::left_down(vec![Direction::Down, Direction::Left], -1.0, -1.0, Ordering::Greater)]
     fn transform_changes_according_to_velocity(
         #[case] acceleration_steps: Vec<Direction>,
         #[case] expected_x: f32,

@@ -106,15 +106,15 @@ mod tests {
     use crate::types::Direction;
 
     #[rstest]
-    #[case(vec![], Direction::Down)]
-    #[case(vec![Direction::Down], Direction::Down)]
-    #[case(vec![Direction::Down, Direction::Right], Direction::Right)]
-    #[case(vec![Direction::Right], Direction::Right)]
-    #[case(vec![Direction::Up, Direction::Right], Direction::Up)]
-    #[case(vec![Direction::Up], Direction::Up)]
-    #[case(vec![Direction::Up, Direction::Left], Direction::Left)]
-    #[case(vec![Direction::Left], Direction::Left)]
-    #[case(vec![Direction::Down, Direction::Left], Direction::Down)]
+    #[case::no_acceleration(vec![], Direction::Down)]
+    #[case::down(vec![Direction::Down], Direction::Down)]
+    #[case::down_right(vec![Direction::Down, Direction::Right], Direction::Right)]
+    #[case::right(vec![Direction::Right], Direction::Right)]
+    #[case::up_right(vec![Direction::Up, Direction::Right], Direction::Up)]
+    #[case::up(vec![Direction::Up], Direction::Up)]
+    #[case::up_left(vec![Direction::Up, Direction::Left], Direction::Left)]
+    #[case::left(vec![Direction::Left], Direction::Left)]
+    #[case::down_left(vec![Direction::Down, Direction::Left], Direction::Down)]
     fn direction_of_velocity(
         #[case] acceleration_steps: Vec<Direction>,
         #[case] expected_direction: Direction,
@@ -129,11 +129,11 @@ mod tests {
     }
 
     #[rstest]
-    #[case(vec![Direction::Down, Direction::Left], vec![Direction::Left, Direction::Down])]
-    #[case(vec![Direction::Down, Direction::Right], vec![Direction::Right, Direction::Down])]
-    #[case(vec![Direction::Up, Direction::Left], vec![Direction::Left, Direction::Up])]
-    #[case(vec![Direction::Up, Direction::Right], vec![Direction::Right, Direction::Up])]
-    #[case(vec![Direction::Up, Direction::Up, Direction::Up, Direction::Up, Direction::Right], vec![Direction::Up, Direction::Right, Direction::Up, Direction::Up, Direction::Up])]
+    #[case::down_left(vec![Direction::Down, Direction::Left], vec![Direction::Left, Direction::Down])]
+    #[case::down_right(vec![Direction::Down, Direction::Right], vec![Direction::Right, Direction::Down])]
+    #[case::up_left(vec![Direction::Up, Direction::Left], vec![Direction::Left, Direction::Up])]
+    #[case::up_right(vec![Direction::Up, Direction::Right], vec![Direction::Right, Direction::Up])]
+    #[case::many_ups_and_right(vec![Direction::Up, Direction::Up, Direction::Up, Direction::Up, Direction::Right], vec![Direction::Up, Direction::Right, Direction::Up, Direction::Up, Direction::Up])]
     fn acceleration_is_commutative(
         #[case] acceleration_steps: Vec<Direction>,
         #[case] commuted_acceleration_steps: Vec<Direction>,
@@ -180,10 +180,10 @@ mod tests {
     }
 
     #[rstest]
-    #[case(Direction::Down)]
-    #[case(Direction::Right)]
-    #[case(Direction::Up)]
-    #[case(Direction::Left)]
+    #[case::down(Direction::Down)]
+    #[case::right(Direction::Right)]
+    #[case::up(Direction::Up)]
+    #[case::left(Direction::Left)]
     fn accelerate_and_decelerate(#[case] direction: Direction) {
         let mut under_test = Velocity::<5>::new(10);
 
