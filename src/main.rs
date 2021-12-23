@@ -4,6 +4,7 @@ use bevy::DefaultPlugins;
 
 use crate::component::manfred::Manfred;
 use crate::component::Position;
+use crate::system::position::{move_positions_system, FromXAndY};
 use crate::system::velocity::velocity_control_system;
 use crate::types::Direction;
 
@@ -19,9 +20,10 @@ fn main() {
     App::build()
         .add_plugins(DefaultPlugins)
         .add_startup_system(add_manf.system())
+        .add_startup_system(add_tree.system())
         .add_system(velocity_control_system.system().label("velocity"))
         .add_system(
-            position_components
+            move_positions_system
                 .system()
                 .label("update_position")
                 .after("velocity"),
@@ -52,6 +54,21 @@ fn add_manf(
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
 }
 
+fn add_tree(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut color_materials: ResMut<Assets<ColorMaterial>>,
+) {
+    let texture_handle = asset_server.load("images\\objects\\tree2.png");
+
+    commands.spawn_bundle(SpriteBundle {
+        sprite: Sprite::new(Vec2::new(80.0, 200.0)),
+        material: color_materials.add(ColorMaterial::from(texture_handle)),
+        transform: Transform::from_translation(Vec3::compute_from_x_y(160.0, 160.0)),
+        ..Default::default()
+    });
+}
+
 fn manfred_sprite_system(mut query: Query<(&mut TextureAtlasSprite, &Manfred, &Velocity)>) {
     if let Some((mut atlas_sprite, manfred, velocity)) = query.iter_mut().next() {
         let new_index = if !velocity.is_moving() {
@@ -69,11 +86,4 @@ fn manfred_sprite_system(mut query: Query<(&mut TextureAtlasSprite, &Manfred, &V
 
         atlas_sprite.index = new_index + direction_offset * MANFRED_SPRITE_ATLAS_COLUMNS;
     }
-}
-
-fn position_components(mut query: Query<(&mut Transform, &Velocity)>) {
-    query.for_each_mut(|(mut transform, velocity)| {
-        transform.translation.x += velocity.x() as f32;
-        transform.translation.y += velocity.y() as f32;
-    });
 }
